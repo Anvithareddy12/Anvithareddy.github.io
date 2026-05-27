@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anvitha Reddy — AI Engineer</title>
+<meta name="description" content="AI Engineer building production LLM systems at AMD. NVIDIA GTC 2025 Speaker.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07080f;--bg2:#0d1017;--card:#12151f;--card-hover:#181c28;
+  --border:#1a1e2e;--border-glow:rgba(0,212,255,0.2);
+  --text:#c9d1d9;--bright:#f0f6fc;--dim:#6e7681;--muted:#484f58;
+  --cyan:#00d4ff;--coral:#ff6b6b;--violet:#7c5cfc;--mint:#36f5c0;
+  --cyan-glow:rgba(0,212,255,0.12);--coral-glow:rgba(255,107,107,0.12);
+  --violet-glow:rgba(124,92,252,0.12);
+  --grad:linear-gradient(135deg,var(--cyan),var(--violet),var(--coral));
+  --mono:'JetBrains Mono',monospace;--head:'Space Grotesk',sans-serif;--body:'Inter',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;scroll-padding-top:80px;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);line-height:1.7;overflow-x:hidden;}
+::selection{background:var(--cyan);color:var(--bg);}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--cyan);border-radius:10px;}
+a{text-decoration:none;color:inherit;}
+
+/* ═══ GRADIENT MESH BG ═══ */
+.mesh-bg{
+  position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;
+  overflow:hidden;
+}
+.mesh-orb{
+  position:absolute;border-radius:50%;filter:blur(120px);opacity:0.07;
+  animation:float-orb 20s ease-in-out infinite;
+}
+.orb-1{width:600px;height:600px;background:var(--cyan);top:-10%;left:-5%;animation-delay:0s;}
+.orb-2{width:500px;height:500px;background:var(--coral);top:40%;right:-10%;animation-delay:-7s;}
+.orb-3{width:400px;height:400px;background:var(--violet);bottom:-5%;left:30%;animation-delay:-14s;}
+@keyframes float-orb{
+  0%,100%{transform:translate(0,0) scale(1);}
+  33%{transform:translate(60px,-40px) scale(1.1);}
+  66%{transform:translate(-30px,50px) scale(0.9);}
+}
+
+/* ═══ INTERACTIVE CANVAS ═══ */
+#nn-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+
+/* ═══ NAV ═══ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  background:rgba(7,8,15,0.6);backdrop-filter:blur(24px) saturate(1.5);
+  border-bottom:1px solid transparent;transition:all 0.4s;
+}
+nav.scrolled{border-color:var(--border);background:rgba(7,8,15,0.9);}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:64px;}
+.logo{font-family:var(--mono);font-size:18px;font-weight:600;}
+.logo .char{display:inline-block;transition:color 0.3s,transform 0.3s;}
+.logo:hover .char{color:var(--cyan);transform:translateY(-2px);}
+.logo .dot{color:var(--coral);}
+.nav-links{display:flex;gap:4px;list-style:none;}
+.nav-links a{
+  font-family:var(--mono);font-size:12px;color:var(--dim);
+  padding:6px 14px;border-radius:6px;transition:all 0.3s;
+}
+.nav-links a:hover,.nav-links a.active{color:var(--cyan);background:var(--cyan-glow);}
+.nav-toggle{display:none;background:none;border:none;cursor:pointer;}
+.nav-toggle span{display:block;width:20px;height:2px;background:var(--dim);margin:4px 0;transition:0.3s;}
+.nav-cta{
+  font-family:var(--mono);font-size:12px;padding:8px 20px;border-radius:8px;
+  background:var(--grad);color:var(--bg);font-weight:600;transition:all 0.3s;
+}
+.nav-cta:hover{transform:translateY(-2px);box-shadow:0 6px 24px var(--cyan-glow);}
+
+/* ═══ REVEAL ═══ */
+.rv{opacity:0;transform:translateY(32px);transition:opacity 0.7s cubic-bezier(0.16,1,0.3,1),transform 0.7s cubic-bezier(0.16,1,0.3,1);}
+.rv.vis{opacity:1;transform:translateY(0);}
+.rv-d1{transition-delay:0.1s;}.rv-d2{transition-delay:0.2s;}.rv-d3{transition-delay:0.3s;}.rv-d4{transition-delay:0.4s;}
+
+/* ═══ HERO ═══ */
+.hero{min-height:100vh;display:flex;align-items:center;position:relative;z-index:1;padding:80px 32px 0;}
+.hero-inner{max-width:1200px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.hero-left{}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:12px;color:var(--mint);
+  background:rgba(54,245,192,0.06);border:1px solid rgba(54,245,192,0.15);
+  padding:6px 16px;border-radius:100px;margin-bottom:24px;
+}
+.hero-tag .pulse{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 8px var(--mint);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.8);}}
+.hero-name{font-family:var(--head);font-size:clamp(18px,2.5vw,24px);font-weight:500;color:var(--dim);margin-bottom:8px;letter-spacing:0.5px;}
+.hero h1{font-family:var(--head);font-size:clamp(40px,6vw,72px);font-weight:700;line-height:1.05;margin-bottom:20px;}
+.hero h1 .line1{color:var(--bright);}
+.hero h1 .line2{
+  background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;display:block;
+}
+.hero-sub{font-size:18px;color:var(--dim);margin-bottom:12px;font-weight:500;}
+.hero-desc{font-size:15px;color:var(--muted);max-width:440px;margin-bottom:32px;}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
+.btn-g{
+  display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13px;
+  background:var(--grad);color:var(--bg);font-weight:600;
+  padding:12px 28px;border-radius:10px;transition:all 0.3s;border:none;cursor:pointer;
+}
+.btn-g:hover{transform:translateY(-2px);box-shadow:0 8px 30px var(--cyan-glow);}
+.btn-o{
+  display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13px;
+  color:var(--text);border:1px solid var(--border);
+  padding:12px 28px;border-radius:10px;transition:all 0.3s;cursor:pointer;background:transparent;
+}
+.btn-o:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-glow);}
+
+/* ─ HERO RIGHT: Live Code Editor ─ */
+.hero-right{position:relative;}
+.code-editor{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.4);
+  position:relative;
+}
+.code-editor::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--grad);
+}
+.editor-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 16px;}
+.editor-tab{
+  font-family:var(--mono);font-size:11px;padding:10px 16px;
+  color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;transition:all 0.3s;
+}
+.editor-tab.active{color:var(--cyan);border-color:var(--cyan);background:rgba(0,212,255,0.04);}
+.editor-tab:hover:not(.active){color:var(--text);}
+.editor-body{padding:20px;font-family:var(--mono);font-size:13px;line-height:2;min-height:300px;}
+.editor-line{display:flex;gap:12px;}
+.line-num{color:var(--muted);min-width:24px;text-align:right;user-select:none;}
+.line-code{flex:1;}
+.kw{color:var(--coral);}
+.fn{color:var(--cyan);}
+.str{color:var(--mint);}
+.cm{color:var(--muted);font-style:italic;}
+.var{color:var(--violet);}
+.op{color:var(--dim);}
+.num{color:#f0a500;}
+.typing-cursor{
+  display:inline-block;width:2px;height:15px;background:var(--cyan);
+  animation:blink 0.8s step-end infinite;vertical-align:text-bottom;margin-left:1px;
+}
+@keyframes blink{50%{opacity:0;}}
+.editor-status{
+  display:flex;justify-content:space-between;padding:6px 16px;
+  border-top:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted);
+}
+.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--mint);margin-right:4px;}
+
+/* ═══ IMPACT MARQUEE ═══ */
+.marquee-section{
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:20px 0;overflow:hidden;position:relative;z-index:1;
+  background:rgba(0,212,255,0.02);
+}
+.marquee-track{
+  display:flex;gap:48px;animation:scroll-marquee 30s linear infinite;
+  width:max-content;
+}
+.marquee-item{
+  display:flex;align-items:center;gap:12px;white-space:nowrap;
+  font-family:var(--mono);font-size:14px;color:var(--dim);
+}
+.marquee-item .val{font-weight:700;font-size:24px;}
+.marquee-item .val.cy{color:var(--cyan);}
+.marquee-item .val.co{color:var(--coral);}
+.marquee-item .val.vi{color:var(--violet);}
+.marquee-item .val.mi{color:var(--mint);}
+.marquee-sep{color:var(--border);font-size:24px;}
+@keyframes scroll-marquee{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+
+/* ═══ SECTIONS ═══ */
+.sec{max-width:1100px;margin:0 auto;padding:120px 32px;position:relative;z-index:1;}
+.sec-label{
+  font-family:var(--mono);font-size:12px;color:var(--cyan);
+  letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;
+}
+.sec-title{font-family:var(--head);font-size:clamp(28px,4vw,42px);font-weight:700;color:var(--bright);margin-bottom:16px;line-height:1.2;}
+.sec-desc{font-size:16px;color:var(--dim);max-width:540px;margin-bottom:48px;}
+
+/* ═══ ABOUT ═══ */
+.about-layout{display:grid;grid-template-columns:1fr 380px;gap:48px;align-items:start;}
+.about-text p{color:var(--text);font-size:15px;margin-bottom:16px;}
+.about-text strong{color:var(--bright);font-weight:600;}
+.about-text .accent{color:var(--cyan);}
+.about-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  overflow:hidden;
+}
+.about-card-header{
+  padding:20px 24px;background:linear-gradient(135deg,rgba(0,212,255,0.06),rgba(124,92,252,0.06));
+  border-bottom:1px solid var(--border);
+  font-family:var(--mono);font-size:12px;color:var(--cyan);letter-spacing:1px;
+}
+.about-card-body{padding:8px 0;}
+.about-row{display:flex;align-items:center;gap:14px;padding:14px 24px;transition:background 0.2s;}
+.about-row:hover{background:rgba(255,255,255,0.02);}
+.about-row-icon{
+  width:36px;height:36px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:16px;flex-shrink:0;
+}
+.about-row-label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.about-row-val{font-size:14px;color:var(--bright);font-weight:500;margin-top:1px;}
+
+/* ═══ SKILLS: Interactive Orbit ═══ */
+.skills-container{position:relative;}
+.skills-visual{display:flex;gap:32px;flex-wrap:wrap;}
+.skill-orbit{
+  flex:1;min-width:300px;background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:28px;transition:all 0.4s;position:relative;overflow:hidden;
+}
+.skill-orbit::before{
+  content:'';position:absolute;top:0;left:0;width:100%;height:3px;
+  transition:opacity 0.4s;opacity:0;
+}
+.skill-orbit:hover{border-color:var(--border-glow);transform:translateY(-6px);box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+.skill-orbit:hover::before{opacity:1;}
+.skill-orbit:nth-child(1)::before{background:linear-gradient(90deg,var(--cyan),var(--violet));}
+.skill-orbit:nth-child(2)::before{background:linear-gradient(90deg,var(--coral),var(--violet));}
+.skill-orbit:nth-child(3)::before{background:linear-gradient(90deg,var(--violet),var(--mint));}
+.skill-orbit:nth-child(4)::before{background:linear-gradient(90deg,var(--mint),var(--cyan));}
+.orbit-header{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+.orbit-icon{
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.orbit-title{font-family:var(--head);font-size:16px;font-weight:700;color:var(--bright);}
+.orbit-tags{display:flex;flex-wrap:wrap;gap:8px;}
+.orbit-tag{
+  font-family:var(--mono);font-size:11px;padding:6px 12px;border-radius:6px;
+  border:1px solid var(--border);color:var(--dim);transition:all 0.3s;cursor:default;
+  position:relative;overflow:hidden;
+}
+.orbit-tag::before{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.05),transparent);
+  transition:left 0.5s;
+}
+.orbit-tag:hover::before{left:100%;}
+.orbit-tag:hover{border-color:var(--cyan);color:var(--cyan);transform:scale(1.08);background:var(--cyan-glow);}
+
+/* ═══ EXPERIENCE ═══ */
+.exp-list{display:flex;flex-direction:column;gap:24px;}
+.exp-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:32px;transition:all 0.4s;position:relative;overflow:hidden;
+}
+.exp-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--grad);opacity:0;transition:opacity 0.4s;
+}
+.exp-card:hover{border-color:var(--border-glow);transform:translateX(8px);}
+.exp-card:hover::before{opacity:1;}
+.exp-top{display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:12px;margin-bottom:4px;}
+.exp-role{font-family:var(--head);font-size:22px;font-weight:700;color:var(--bright);}
+.exp-co{color:var(--cyan);}
+.exp-date{font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--cyan-glow);padding:4px 12px;border-radius:6px;white-space:nowrap;}
+.exp-loc{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:16px;}
+.exp-bullets{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.exp-bullets li{
+  font-size:14px;color:var(--dim);padding-left:20px;position:relative;line-height:1.65;
+}
+.exp-bullets li::before{content:'';position:absolute;left:0;top:9px;width:8px;height:8px;border-radius:2px;border:2px solid var(--cyan);background:transparent;}
+.exp-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px;}
+.exp-tag{font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:4px;background:rgba(124,92,252,0.08);color:var(--violet);border:1px solid rgba(124,92,252,0.15);}
+
+/* ═══ PROJECTS ═══ */
+.proj-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+.proj-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:32px;transition:all 0.5s cubic-bezier(0.16,1,0.3,1);
+  position:relative;overflow:hidden;
+}
+.proj-card::after{
+  content:'';position:absolute;inset:0;border-radius:16px;
+  background:radial-gradient(600px circle at var(--mx,50%) var(--my,50%),rgba(0,212,255,0.04),transparent 60%);
+  pointer-events:none;opacity:0;transition:opacity 0.4s;
+}
+.proj-card:hover{border-color:var(--border-glow);transform:translateY(-8px);box-shadow:0 24px 64px rgba(0,0,0,0.35);}
+.proj-card:hover::after{opacity:1;}
+.proj-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;position:relative;z-index:1;}
+.proj-icon{font-size:32px;}
+.proj-badge{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;padding:4px 10px;border-radius:4px;font-weight:700;text-transform:uppercase;}
+.b-gtc{background:rgba(124,92,252,0.12);color:var(--violet);}
+.b-dhs{background:rgba(0,212,255,0.12);color:var(--cyan);}
+.b-prod{background:rgba(54,245,192,0.12);color:var(--mint);}
+.b-ship{background:rgba(255,107,107,0.12);color:var(--coral);}
+.proj-card h3{font-family:var(--head);font-size:19px;font-weight:700;color:var(--bright);margin-bottom:10px;position:relative;z-index:1;}
+.proj-card p{font-size:14px;color:var(--dim);margin-bottom:14px;position:relative;z-index:1;}
+.proj-metrics{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;position:relative;z-index:1;}
+.proj-metric{
+  font-family:var(--mono);font-size:11px;color:var(--mint);
+  background:rgba(54,245,192,0.06);border:1px solid rgba(54,245,192,0.12);
+  padding:4px 10px;border-radius:4px;
+}
+.proj-tags{display:flex;flex-wrap:wrap;gap:6px;position:relative;z-index:1;}
+
+/* ═══ EDUCATION ═══ */
+.edu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;}
+.edu-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:28px;transition:all 0.4s;position:relative;overflow:hidden;
+}
+.edu-card:hover{border-color:var(--border-glow);transform:translateY(-4px);}
+.edu-card h3{font-family:var(--head);font-size:18px;font-weight:700;color:var(--bright);margin-bottom:4px;}
+.edu-degree{color:var(--cyan);font-size:14px;margin-bottom:8px;font-weight:500;}
+.edu-meta{font-family:var(--mono);font-size:12px;color:var(--muted);}
+.edu-gpa{
+  display:inline-flex;align-items:center;gap:6px;margin-top:12px;
+  font-family:var(--mono);font-size:13px;color:var(--mint);
+  background:rgba(54,245,192,0.06);padding:6px 14px;border-radius:8px;
+  border:1px solid rgba(54,245,192,0.12);
+}
+.edu-courses{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+
+/* ═══ CONTACT ═══ */
+.contact-center{text-align:center;}
+.contact-center .sec-desc{margin-left:auto;margin-right:auto;}
+.contact-links{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:32px;}
+.contact-link{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:var(--mono);font-size:13px;color:var(--dim);
+  background:var(--card);border:1px solid var(--border);
+  padding:14px 24px;border-radius:12px;transition:all 0.3s;
+}
+.contact-link:hover{border-color:var(--cyan);color:var(--cyan);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.3);}
+.contact-link .ico{font-size:18px;}
+
+/* ═══ FOOTER ═══ */
+footer{border-top:1px solid var(--border);padding:28px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);position:relative;z-index:1;}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:900px){
+  .hero-inner{grid-template-columns:1fr;gap:40px;}
+  .about-layout{grid-template-columns:1fr;}
+  .proj-grid{grid-template-columns:1fr;}
+  .skills-visual{flex-direction:column;}
+}
+@media(max-width:768px){
+  .nav-links{display:none;flex-direction:column;position:absolute;top:64px;left:0;right:0;background:rgba(7,8,15,0.97);backdrop-filter:blur(20px);padding:16px 32px;gap:4px;border-bottom:1px solid var(--border);}
+  .nav-links.open{display:flex;}
+  .nav-toggle{display:block;}
+  .nav-cta{display:none;}
+  .sec{padding:80px 20px;}
+  .hero{padding:80px 20px 0;}
+  .marquee-item .val{font-size:18px;}
+}
+</style>
+</head>
+<body>
+
+<!-- Gradient mesh -->
+<div class="mesh-bg">
+  <div class="mesh-orb orb-1"></div>
+  <div class="mesh-orb orb-2"></div>
+  <div class="mesh-orb orb-3"></div>
+</div>
+
+<!-- Neural network canvas -->
+<canvas id="nn-canvas"></canvas>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="#" class="logo"><span class="char">a</span><span class="char">n</span><span class="char">v</span><span class="char">i</span><span class="char">t</span><span class="char">h</span><span class="char">a</span><span class="dot">.</span></a>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#about">about</a></li>
+      <li><a href="#skills">skills</a></li>
+      <li><a href="#experience">experience</a></li>
+      <li><a href="#projects">projects</a></li>
+      <li><a href="#education">education</a></li>
+      <li><a href="#contact">contact</a></li>
+    </ul>
+    <a href="mailto:anvithareddy2124@gmail.com" class="nav-cta">Let's Talk</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero" id="hero">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-tag rv"><span class="pulse"></span> Open to opportunities</div>
+      <p class="hero-name rv rv-d1">Anvitha Reddy</p>
+      <h1 class="rv rv-d1">
+        <span class="line1">I build AI that</span>
+        <span class="line2">survives production.</span>
+      </h1>
+      <p class="hero-sub rv rv-d2">AI Engineer @ AMD &middot; NVIDIA GTC '25 Speaker</p>
+      <p class="hero-desc rv rv-d3">
+        Most LLM demos break in production. I design the agentic pipelines, guardrails, and evals that keep them running — and useful — at enterprise scale.
+      </p>
+      <div class="hero-btns rv rv-d4">
+        <a href="#projects" class="btn-g">See what I've shipped &rarr;</a>
+        <a href="#contact" class="btn-o">Get in touch</a>
+      </div>
+    </div>
+    <div class="hero-right rv rv-d2">
+      <div class="code-editor">
+        <div class="editor-tabs">
+          <div class="editor-tab active" data-tab="0">pipeline.py</div>
+          <div class="editor-tab" data-tab="1">eval.py</div>
+          <div class="editor-tab" data-tab="2">config.yaml</div>
+        </div>
+        <div class="editor-body" id="editorBody">
+          <!-- Filled by JS -->
+        </div>
+        <div class="editor-status">
+          <span><span class="status-dot"></span> Python 3.11 &mdash; LangGraph</span>
+          <span>UTF-8 &middot; LF</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ IMPACT MARQUEE ═══ -->
+<div class="marquee-section">
+  <div class="marquee-track" id="marquee">
+    <div class="marquee-item"><span class="val cy">300%</span> Engagement Boost</div><span class="marquee-sep">/</span>
+    <div class="marquee-item"><span class="val co">>90%</span> Translation Accuracy</div><span class="marquee-sep">/</span>
+    <div class="marquee-item"><span class="val vi">95%+</span> Gesture Recognition</div><span class="marquee-sep">/</span>
+    <div class="marquee-item"><span class="val mi">&lt;2s</span> Inference Latency</div><span class="marquee-sep">/</span>
+    <div class="marquee-item"><span class="val cy">50+</span> Languages Supported</div><span class="marquee-sep">/</span>
+    <div class="marquee-item"><span class="val co">40%</span> Support Tickets Reduced</div><span class="marquee-sep">/</span>
+    <div class="marquee-item"><span class="val vi">15 FPS</span> Real-time Inference</div><span class="marquee-sep">/</span>
+    <div class="marquee-item"><span class="val mi">DHS</span> Pilot Approved</div><span class="marquee-sep">/</span>
+    <!-- Duplicate for seamless loop -->
+    <div class="marquee-item"><span class="val cy">300%</span> Engagement Boost</div><span class="marquee-sep">/</span>
+    <div class="marquee-item"><span class="val co">>90%</span> Translation Accuracy</div><span class="marquee-sep">/</span>
+    <div class="marquee-item"><span class="val vi">95%+</span> Gesture Recognition</div><span class="marquee-sep">/</span>
+    <div class="marquee-item"><span class="val mi">&lt;2s</span> Inference Latency</div><span class="marquee-sep">/</span>
+    <div class="marquee-item"><span class="val cy">50+</span> Languages Supported</div><span class="marquee-sep">/</span>
+    <div class="marquee-item"><span class="val co">40%</span> Support Tickets Reduced</div><span class="marquee-sep">/</span>
+    <div class="marquee-item"><span class="val vi">15 FPS</span> Real-time Inference</div><span class="marquee-sep">/</span>
+    <div class="marquee-item"><span class="val mi">DHS</span> Pilot Approved</div><span class="marquee-sep">/</span>
+  </div>
+</div>
+
+<!-- ═══ ABOUT ═══ -->
+<section class="sec" id="about">
+  <div class="sec-label rv">About</div>
+  <div class="sec-title rv">Engineer, not experimenter.</div>
+  <div class="sec-desc rv">I don't build demos. I build systems that teams depend on every day.</div>
+  <div class="about-layout">
+    <div class="about-text rv">
+      <p>At <strong class="accent">AMD</strong>, I own the AI assistant that replaced manual SQL workflows across the org. Enterprise teams query messy data in plain English — I built the agentic RAG pipeline, the Text-to-SQL layer over Snowflake, and the eval framework that catches hallucinations before users see them.</p>
+      <p>Before that, I built a <strong>multilingual conversational AI platform</strong> from scratch at CornerstoneX — 50+ languages, CUDA-optimized to sub-2-second latency, integrated with Metahuman avatars. Presented the work at <strong class="accent">NVIDIA GTC 2025</strong>.</p>
+      <p>I also shipped an <strong>ASL gesture recognition system</strong> that handles 1,000+ signs at 95%+ accuracy in real-time. It was approved for pilot testing by the <strong>U.S. Department of Homeland Security</strong> for deployment in airports and transit hubs.</p>
+    </div>
+    <div class="about-card rv rv-d2">
+      <div class="about-card-header">// QUICK FACTS</div>
+      <div class="about-card-body">
+        <div class="about-row">
+          <div class="about-row-icon" style="background:var(--cyan-glow);color:var(--cyan);">&#9670;</div>
+          <div><div class="about-row-label">Role</div><div class="about-row-val">AI Engineer @ AMD</div></div>
+        </div>
+        <div class="about-row">
+          <div class="about-row-icon" style="background:var(--violet-glow);color:var(--violet);">&#9733;</div>
+          <div><div class="about-row-label">Speaker</div><div class="about-row-val">NVIDIA GTC 2025</div></div>
+        </div>
+        <div class="about-row">
+          <div class="about-row-icon" style="background:rgba(54,245,192,0.1);color:var(--mint);">&#10003;</div>
+          <div><div class="about-row-label">Validation</div><div class="about-row-val">DHS Pilot Approval</div></div>
+        </div>
+        <div class="about-row">
+          <div class="about-row-icon" style="background:var(--coral-glow);color:var(--coral);">&#9881;</div>
+          <div><div class="about-row-label">Stack</div><div class="about-row-val">LangChain &middot; RAG &middot; Snowflake</div></div>
+        </div>
+        <div class="about-row">
+          <div class="about-row-icon" style="background:var(--cyan-glow);color:var(--cyan);">&#127891;</div>
+          <div><div class="about-row-label">Education</div><div class="about-row-val">B.Tech CS &middot; Christ University</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SKILLS ═══ -->
+<section class="sec" id="skills">
+  <div class="sec-label rv">Skills</div>
+  <div class="sec-title rv">What I work with.</div>
+  <div class="sec-desc rv">Not just tools I've heard of. Tools I've shipped production systems with.</div>
+  <div class="skills-visual">
+    <div class="skill-orbit rv">
+      <div class="orbit-header">
+        <div class="orbit-icon" style="background:var(--cyan-glow);color:var(--cyan);">&#128187;</div>
+        <div class="orbit-title">Languages & Core</div>
+      </div>
+      <div class="orbit-tags">
+        <span class="orbit-tag">Python</span><span class="orbit-tag">SQL</span>
+        <span class="orbit-tag">Java</span><span class="orbit-tag">JavaScript</span>
+      </div>
+    </div>
+    <div class="skill-orbit rv rv-d1">
+      <div class="orbit-header">
+        <div class="orbit-icon" style="background:var(--coral-glow);color:var(--coral);">&#129504;</div>
+        <div class="orbit-title">AI & GenAI</div>
+      </div>
+      <div class="orbit-tags">
+        <span class="orbit-tag">LLM Orchestration</span><span class="orbit-tag">RAG Pipelines</span>
+        <span class="orbit-tag">Agentic AI</span><span class="orbit-tag">Prompt Engineering</span>
+        <span class="orbit-tag">Fine-tuning (LoRA/PEFT)</span><span class="orbit-tag">Text-to-SQL</span>
+        <span class="orbit-tag">NLP</span><span class="orbit-tag">Computer Vision</span>
+        <span class="orbit-tag">Deep Learning</span><span class="orbit-tag">Speech Recognition</span>
+      </div>
+    </div>
+    <div class="skill-orbit rv rv-d2">
+      <div class="orbit-header">
+        <div class="orbit-icon" style="background:var(--violet-glow);color:var(--violet);">&#9881;</div>
+        <div class="orbit-title">Frameworks & Infra</div>
+      </div>
+      <div class="orbit-tags">
+        <span class="orbit-tag">LangChain</span><span class="orbit-tag">LangGraph</span>
+        <span class="orbit-tag">Hugging Face</span><span class="orbit-tag">PyTorch</span>
+        <span class="orbit-tag">Whisper</span><span class="orbit-tag">MCP</span>
+        <span class="orbit-tag">n8n</span><span class="orbit-tag">Ollama</span>
+        <span class="orbit-tag">ElevenLabs</span><span class="orbit-tag">CUDA</span>
+      </div>
+    </div>
+    <div class="skill-orbit rv rv-d3">
+      <div class="orbit-header">
+        <div class="orbit-icon" style="background:rgba(54,245,192,0.1);color:var(--mint);">&#9729;</div>
+        <div class="orbit-title">Data & Platform</div>
+      </div>
+      <div class="orbit-tags">
+        <span class="orbit-tag">Snowflake</span><span class="orbit-tag">Cortex</span>
+        <span class="orbit-tag">Vector Databases</span><span class="orbit-tag">Git</span>
+        <span class="orbit-tag">Linux</span><span class="orbit-tag">Docker</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ EXPERIENCE ═══ -->
+<section class="sec" id="experience">
+  <div class="sec-label rv">Experience</div>
+  <div class="sec-title rv">Where I've shipped.</div>
+  <div class="exp-list">
+    <div class="exp-card rv">
+      <div class="exp-top">
+        <div><div class="exp-role">AI Engineer &middot; <span class="exp-co">AMD</span></div></div>
+        <span class="exp-date">Aug 2025 &mdash; Present</span>
+      </div>
+      <div class="exp-loc">Hyderabad, India</div>
+      <ul class="exp-bullets">
+        <li>Shipped a production AI assistant that replaces manual SQL workflows with natural language queries across enterprise data using Snowflake, Cortex, MCP, and LLM-driven Text-to-SQL</li>
+        <li>Designed the agentic RAG pipeline end to end with LangChain, LangGraph, and vector databases for multi-step retrieval, live context grounding, and hallucination reduction</li>
+        <li>Owned evals, guardrails, and production reliability — tracking LLM accuracy and keeping the system stable under real enterprise usage</li>
+      </ul>
+      <div class="exp-tags">
+        <span class="exp-tag">Snowflake</span><span class="exp-tag">LangChain</span><span class="exp-tag">LangGraph</span><span class="exp-tag">MCP</span><span class="exp-tag">RAG</span><span class="exp-tag">Text-to-SQL</span>
+      </div>
+    </div>
+    <div class="exp-card rv">
+      <div class="exp-top">
+        <div><div class="exp-role">ML Developer &middot; <span class="exp-co">CornerstoneX</span></div></div>
+        <span class="exp-date">Nov 2024 &mdash; Aug 2025</span>
+      </div>
+      <div class="exp-loc">Hyderabad, India</div>
+      <ul class="exp-bullets">
+        <li>Built a multilingual conversational AI platform supporting 50+ languages — boosted global engagement by 300% and reduced support tickets by 40%</li>
+        <li>Designed scalable NLP pipelines using Whisper, Hugging Face M2M100, and ElevenLabs. CUDA-optimized to >90% accuracy at sub-2s latency</li>
+        <li>Integrated Metahuman avatars for AI-human interactions — drove 40% rise in enterprise demo requests</li>
+        <li>Engineered CNN-based ASL gesture recognition (1,000+ gestures, 95%+ accuracy, 15 FPS) — approved for DHS pilot</li>
+        <li>Built voice-controlled navigation tool for accessibility with 85%+ precision, improving task speed by 40%</li>
+      </ul>
+      <div class="exp-tags">
+        <span class="exp-tag">Whisper</span><span class="exp-tag">CUDA</span><span class="exp-tag">Hugging Face</span><span class="exp-tag">ElevenLabs</span><span class="exp-tag">CNN</span><span class="exp-tag">Computer Vision</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PROJECTS ═══ -->
+<section class="sec" id="projects">
+  <div class="sec-label rv">Projects</div>
+  <div class="sec-title rv">Things I've built.</div>
+  <div class="sec-desc rv">Not tutorials. Not forks. Production systems with real users and measurable outcomes.</div>
+  <div class="proj-grid">
+    <div class="proj-card rv" onmousemove="this.style.setProperty('--mx',event.offsetX+'px');this.style.setProperty('--my',event.offsetY+'px')">
+      <div class="proj-top"><span class="proj-icon">&#128640;</span><span class="proj-badge b-prod">PRODUCTION</span></div>
+      <h3>Enterprise AI Assistant</h3>
+      <p>Natural language to SQL over enterprise Snowflake data. Replaced manual analyst workflows with agentic multi-step reasoning and production guardrails.</p>
+      <div class="proj-metrics"><span class="proj-metric">Real-time queries</span><span class="proj-metric">Production-grade</span></div>
+      <div class="proj-tags"><span class="orbit-tag">Snowflake</span><span class="orbit-tag">MCP</span><span class="orbit-tag">LangGraph</span><span class="orbit-tag">Text-to-SQL</span></div>
+    </div>
+    <div class="proj-card rv rv-d1" onmousemove="this.style.setProperty('--mx',event.offsetX+'px');this.style.setProperty('--my',event.offsetY+'px')">
+      <div class="proj-top"><span class="proj-icon">&#127760;</span><span class="proj-badge b-gtc">GTC 2025</span></div>
+      <h3>Multilingual Conversational AI</h3>
+      <p>Real-time 50+ language AI support with CUDA-optimized inference and Metahuman avatar integration. Presented at NVIDIA GTC.</p>
+      <div class="proj-metrics"><span class="proj-metric">300% engagement</span><span class="proj-metric">>90% accuracy</span><span class="proj-metric">&lt;2s latency</span></div>
+      <div class="proj-tags"><span class="orbit-tag">Whisper</span><span class="orbit-tag">M2M100</span><span class="orbit-tag">CUDA</span><span class="orbit-tag">ElevenLabs</span></div>
+    </div>
+    <div class="proj-card rv rv-d2" onmousemove="this.style.setProperty('--mx',event.offsetX+'px');this.style.setProperty('--my',event.offsetY+'px')">
+      <div class="proj-top"><span class="proj-icon">&#9995;</span><span class="proj-badge b-dhs">DHS APPROVED</span></div>
+      <h3>ASL Gesture Recognition</h3>
+      <p>CNN-based system identifying 1,000+ ASL gestures for real-time translation in airports and transit hubs. Approved by U.S. Department of Homeland Security.</p>
+      <div class="proj-metrics"><span class="proj-metric">95%+ accuracy</span><span class="proj-metric">15 FPS real-time</span></div>
+      <div class="proj-tags"><span class="orbit-tag">PyTorch</span><span class="orbit-tag">CNN</span><span class="orbit-tag">Computer Vision</span></div>
+    </div>
+    <div class="proj-card rv rv-d3" onmousemove="this.style.setProperty('--mx',event.offsetX+'px');this.style.setProperty('--my',event.offsetY+'px')">
+      <div class="proj-top"><span class="proj-icon">&#127908;</span><span class="proj-badge b-ship">SHIPPED</span></div>
+      <h3>Voice Navigation Assistant</h3>
+      <p>Hands-free browser and desktop operation for users with mobility challenges. Multi-intent voice commands with 85%+ precision.</p>
+      <div class="proj-metrics"><span class="proj-metric">85%+ precision</span><span class="proj-metric">40% faster tasks</span></div>
+      <div class="proj-tags"><span class="orbit-tag">Speech Recognition</span><span class="orbit-tag">NLP</span><span class="orbit-tag">Accessibility</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ EDUCATION ═══ -->
+<section class="sec" id="education">
+  <div class="sec-label rv">Education</div>
+  <div class="sec-title rv">Where it started.</div>
+  <div class="edu-grid">
+    <div class="edu-card rv">
+      <h3>Christ University, Bangalore</h3>
+      <div class="edu-degree">B.Tech — Computer Science (Data Science)</div>
+      <div class="edu-meta">Aug 2021 &mdash; Apr 2025</div>
+      <div class="edu-gpa">GPA: 3.5 / 4.0</div>
+      <div class="edu-courses">
+        <span class="orbit-tag">DSA</span><span class="orbit-tag">OOP</span><span class="orbit-tag">DBMS</span>
+        <span class="orbit-tag">OS</span><span class="orbit-tag">Data Science</span><span class="orbit-tag">Software Dev</span>
+      </div>
+    </div>
+    <div class="edu-card rv rv-d1">
+      <h3>Sri Chaitanya College</h3>
+      <div class="edu-degree">Intermediate — Mathematics & Computer Science</div>
+      <div class="edu-meta">May 2019 &mdash; Apr 2021</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CONTACT ═══ -->
+<section class="sec contact-center" id="contact">
+  <div class="sec-label rv" style="justify-content:center;">Contact</div>
+  <div class="sec-title rv">Let's build something.</div>
+  <div class="sec-desc rv" style="margin-left:auto;margin-right:auto;">Interested in production AI, agentic systems, or hard infrastructure problems? I'd love to hear from you.</div>
+  <div class="rv"><a href="mailto:anvithareddy2124@gmail.com" class="btn-g">Say hello &rarr;</a></div>
+  <div class="contact-links rv rv-d1">
+    <a href="mailto:anvithareddy2124@gmail.com" class="contact-link"><span class="ico">&#9993;</span> Email</a>
+    <a href="https://linkedin.com/in/anvithareddy123" target="_blank" class="contact-link"><span class="ico">&#128101;</span> LinkedIn</a>
+    <a href="https://github.com/anvithareddy" target="_blank" class="contact-link"><span class="ico">&#128187;</span> GitHub</a>
+  </div>
+</section>
+
+<footer>built by anvitha reddy &middot; 2026</footer>
+
+<script>
+/* ═══ NEURAL NETWORK CANVAS ═══ */
+const c=document.getElementById('nn-canvas'),ctx=c.getContext('2d');
+let W,H,nodes=[],mouse={x:-1e3,y:-1e3};
+function resize(){W=c.width=innerWidth;H=c.height=innerHeight;}
+resize();addEventListener('resize',resize);
+document.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
+
+class Node{
+  constructor(){this.reset();}
+  reset(){
+    this.x=Math.random()*W;this.y=Math.random()*H;
+    this.vx=(Math.random()-0.5)*0.4;this.vy=(Math.random()-0.5)*0.4;
+    this.r=Math.random()*1.8+0.5;
+    this.baseAlpha=Math.random()*0.3+0.05;
+  }
+  update(){
+    // Mouse repulsion
+    const dx=this.x-mouse.x,dy=this.y-mouse.y;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<200){
+      const force=0.8*(1-dist/200);
+      this.vx+=dx/dist*force;
+      this.vy+=dy/dist*force;
+    }
+    this.vx*=0.98;this.vy*=0.98;
+    this.x+=this.vx;this.y+=this.vy;
+    if(this.x<0||this.x>W)this.vx*=-1;
+    if(this.y<0||this.y>H)this.vy*=-1;
+  }
+  draw(){
+    const dx=this.x-mouse.x,dy=this.y-mouse.y;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    const glow=dist<250?0.6*(1-dist/250):0;
+    const alpha=this.baseAlpha+glow;
+    ctx.beginPath();ctx.arc(this.x,this.y,this.r+glow*2,0,Math.PI*2);
+    ctx.fillStyle=`rgba(0,212,255,${alpha})`;ctx.fill();
+  }
+}
+
+const nodeCount=Math.min(100,Math.floor(W/16));
+for(let i=0;i<nodeCount;i++)nodes.push(new Node());
+
+function drawConnections(){
+  for(let i=0;i<nodes.length;i++){
+    for(let j=i+1;j<nodes.length;j++){
+      const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<160){
+        // Color based on proximity to mouse
+        const mx=(nodes[i].x+nodes[j].x)/2,my=(nodes[i].y+nodes[j].y)/2;
+        const md=Math.sqrt((mx-mouse.x)**2+(my-mouse.y)**2);
+        const mouseGlow=md<300?0.15*(1-md/300):0;
+        const alpha=0.04*(1-dist/160)+mouseGlow;
+        ctx.beginPath();
+        ctx.strokeStyle=md<300?`rgba(0,212,255,${alpha})`:`rgba(124,92,252,${alpha})`;
+        ctx.lineWidth=0.6;
+        ctx.moveTo(nodes[i].x,nodes[i].y);
+        ctx.lineTo(nodes[j].x,nodes[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+function animate(){
+  ctx.clearRect(0,0,W,H);
+  nodes.forEach(n=>{n.update();n.draw();});
+  drawConnections();
+  requestAnimationFrame(animate);
+}
+animate();
+
+/* ═══ CODE EDITOR TABS ═══ */
+const codeSnippets=[
+  // pipeline.py
+  [
+    {n:'1',code:'<span class="kw">from</span> <span class="fn">langchain</span> <span class="kw">import</span> <span class="var">ChatOpenAI</span>'},
+    {n:'2',code:'<span class="kw">from</span> <span class="fn">langgraph</span> <span class="kw">import</span> <span class="var">StateGraph</span>'},
+    {n:'3',code:'<span class="kw">from</span> <span class="fn">snowflake</span> <span class="kw">import</span> <span class="var">connector</span>'},
+    {n:'4',code:''},
+    {n:'5',code:'<span class="cm"># Agentic RAG pipeline with guardrails</span>'},
+    {n:'6',code:'<span class="kw">class</span> <span class="fn">ProductionPipeline</span><span class="op">:</span>'},
+    {n:'7',code:'&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">__init__</span><span class="op">(</span><span class="var">self</span><span class="op">):</span>'},
+    {n:'8',code:'&nbsp;&nbsp;&nbsp;&nbsp;self<span class="op">.</span><span class="var">graph</span> <span class="op">=</span> <span class="fn">StateGraph</span><span class="op">(</span><span class="var">AgentState</span><span class="op">)</span>'},
+    {n:'9',code:'&nbsp;&nbsp;&nbsp;&nbsp;self<span class="op">.</span><span class="var">retriever</span> <span class="op">=</span> <span class="fn">VectorRetriever</span><span class="op">()</span>'},
+    {n:'10',code:'&nbsp;&nbsp;&nbsp;&nbsp;self<span class="op">.</span><span class="var">sql_gen</span> <span class="op">=</span> <span class="fn">TextToSQL</span><span class="op">(</span><span class="str">"snowflake"</span><span class="op">)</span>'},
+    {n:'11',code:''},
+    {n:'12',code:'&nbsp;&nbsp;<span class="kw">async def</span> <span class="fn">run</span><span class="op">(</span>self, <span class="var">query</span><span class="op">):</span>'},
+    {n:'13',code:'&nbsp;&nbsp;&nbsp;&nbsp;<span class="var">context</span> <span class="op">=</span> <span class="kw">await</span> self<span class="op">.</span><span class="fn">retrieve</span><span class="op">(</span><span class="var">query</span><span class="op">)</span>'},
+    {n:'14',code:'&nbsp;&nbsp;&nbsp;&nbsp;<span class="var">result</span> <span class="op">=</span> <span class="kw">await</span> self<span class="op">.</span><span class="fn">generate</span><span class="op">(</span><span class="var">context</span><span class="op">)</span>'},
+    {n:'15',code:'&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> self<span class="op">.</span><span class="fn">guardrail</span><span class="op">(</span><span class="var">result</span><span class="op">)</span><span class="typing-cursor"></span>'},
+  ],
+  // eval.py
+  [
+    {n:'1',code:'<span class="kw">from</span> <span class="fn">evals</span> <span class="kw">import</span> <span class="var">HallucinationDetector</span>'},
+    {n:'2',code:'<span class="kw">from</span> <span class="fn">metrics</span> <span class="kw">import</span> <span class="var">accuracy, latency</span>'},
+    {n:'3',code:''},
+    {n:'4',code:'<span class="cm"># Production eval framework</span>'},
+    {n:'5',code:'<span class="kw">class</span> <span class="fn">LLMEvaluator</span><span class="op">:</span>'},
+    {n:'6',code:'&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">check_hallucination</span><span class="op">(</span>self, resp<span class="op">):</span>'},
+    {n:'7',code:'&nbsp;&nbsp;&nbsp;&nbsp;<span class="var">score</span> <span class="op">=</span> self<span class="op">.</span><span class="fn">detector</span><span class="op">.</span>score<span class="op">(</span>resp<span class="op">)</span>'},
+    {n:'8',code:'&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> score <span class="op">&gt;</span> <span class="num">0.85</span><span class="op">:</span>'},
+    {n:'9',code:'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="str">"PASS"</span>'},
+    {n:'10',code:'&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> self<span class="op">.</span><span class="fn">escalate</span><span class="op">(</span>resp<span class="op">)</span>'},
+    {n:'11',code:''},
+    {n:'12',code:'&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">run_suite</span><span class="op">(</span>self, cases<span class="op">):</span>'},
+    {n:'13',code:'&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">for</span> <span class="var">case</span> <span class="kw">in</span> cases<span class="op">:</span>'},
+    {n:'14',code:'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self<span class="op">.</span><span class="fn">assert_grounded</span><span class="op">(</span>case<span class="op">)</span>'},
+    {n:'15',code:'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self<span class="op">.</span><span class="fn">assert_latency</span><span class="op">(</span>case, <span class="num">2.0</span><span class="op">)</span><span class="typing-cursor"></span>'},
+  ],
+  // config.yaml
+  [
+    {n:'1',code:'<span class="cm"># Production LLM Configuration</span>'},
+    {n:'2',code:'<span class="var">pipeline</span><span class="op">:</span>'},
+    {n:'3',code:'&nbsp;&nbsp;<span class="var">model</span><span class="op">:</span> <span class="str">gpt-4o</span>'},
+    {n:'4',code:'&nbsp;&nbsp;<span class="var">temperature</span><span class="op">:</span> <span class="num">0.1</span>'},
+    {n:'5',code:'&nbsp;&nbsp;<span class="var">max_retries</span><span class="op">:</span> <span class="num">3</span>'},
+    {n:'6',code:''},
+    {n:'7',code:'<span class="var">retrieval</span><span class="op">:</span>'},
+    {n:'8',code:'&nbsp;&nbsp;<span class="var">strategy</span><span class="op">:</span> <span class="str">agentic_rag</span>'},
+    {n:'9',code:'&nbsp;&nbsp;<span class="var">vector_db</span><span class="op">:</span> <span class="str">pinecone</span>'},
+    {n:'10',code:'&nbsp;&nbsp;<span class="var">top_k</span><span class="op">:</span> <span class="num">8</span>'},
+    {n:'11',code:''},
+    {n:'12',code:'<span class="var">guardrails</span><span class="op">:</span>'},
+    {n:'13',code:'&nbsp;&nbsp;<span class="var">hallucination_threshold</span><span class="op">:</span> <span class="num">0.85</span>'},
+    {n:'14',code:'&nbsp;&nbsp;<span class="var">max_latency_ms</span><span class="op">:</span> <span class="num">2000</span>'},
+    {n:'15',code:'&nbsp;&nbsp;<span class="var">fallback</span><span class="op">:</span> <span class="str">human_escalation</span><span class="typing-cursor"></span>'},
+  ]
+];
+
+const editorBody=document.getElementById('editorBody');
+const tabs=document.querySelectorAll('.editor-tab');
+let activeTab=0;
+
+function renderCode(idx){
+  editorBody.innerHTML=codeSnippets[idx].map(l=>
+    `<div class="editor-line"><span class="line-num">${l.n}</span><span class="line-code">${l.code}</span></div>`
+  ).join('');
+}
+renderCode(0);
+
+tabs.forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    tabs.forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    activeTab=parseInt(tab.dataset.tab);
+    editorBody.style.opacity=0;
+    setTimeout(()=>{renderCode(activeTab);editorBody.style.opacity=1;},200);
+  });
+});
+editorBody.style.transition='opacity 0.2s';
+
+// Auto-cycle tabs
+let tabInterval=setInterval(()=>{
+  activeTab=(activeTab+1)%3;
+  tabs.forEach(t=>t.classList.remove('active'));
+  tabs[activeTab].classList.add('active');
+  editorBody.style.opacity=0;
+  setTimeout(()=>{renderCode(activeTab);editorBody.style.opacity=1;},200);
+},5000);
+// Pause on hover
+document.querySelector('.code-editor').addEventListener('mouseenter',()=>clearInterval(tabInterval));
+
+/* ═══ NAV ═══ */
+const nav=document.getElementById('navbar');
+addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>50));
+document.getElementById('navToggle').addEventListener('click',()=>document.getElementById('navLinks').classList.toggle('open'));
+document.querySelectorAll('#navLinks a').forEach(a=>a.addEventListener('click',()=>document.getElementById('navLinks').classList.remove('open')));
+
+// Active link
+const secs=document.querySelectorAll('section[id]');
+addEventListener('scroll',()=>{
+  const y=scrollY+100;
+  secs.forEach(s=>{
+    const link=document.querySelector(`nav a[href="#${s.id}"]`);
+    if(link)link.classList.toggle('active',y>=s.offsetTop-100&&y<s.offsetTop+s.offsetHeight);
+  });
+});
+
+/* ═══ REVEAL ═══ */
+const ro=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('vis');}),{threshold:0.08,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+</script>
+</body>
+</html>
