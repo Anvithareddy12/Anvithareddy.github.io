@@ -2,7 +2,7 @@
 
 Portfolio website for **Anvitha Reddy**, AI Engineer at AMD — built with Three.js, GSAP, and vanilla JS. No frameworks, no build step.
 
-**Live site → anvithareddy12.github.io/Anvithareddy.github.io**
+**Live site → [anvithareddy12.github.io/Anvithareddy.github.io](https://anvithareddy12.github.io/Anvithareddy.github.io/)**
 
 ---
 
