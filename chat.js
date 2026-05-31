@@ -42,7 +42,7 @@ function getResp(msg) {
       if (low.indexOf(KB[i].k[j]) !== -1) return KB[i].a;
     }
   }
-  return "Great question! For anything I haven't covered, reach Anvitha directly: anvithareddy2124@gmail.com — or connect on LinkedIn. I'm her keyword-matching twin, not a full LLM!";
+  return "That's something Anvitha can answer better directly! Reach her at anvithareddy2124@gmail.com or connect on LinkedIn: linkedin.com/in/anvithareddy123 — she typically responds within 24 hours.";
 }
 
 function addMsg(text, role) {

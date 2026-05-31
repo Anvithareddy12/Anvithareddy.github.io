@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Anvitha Reddy — AI Engineer</title>
   <meta name="description" content="AI Engineer building production-grade Generative AI systems. RAG pipelines, Text-to-SQL, LLM orchestration at enterprise scale.">
+  <meta name="theme-color" content="#07080f">
+  <meta property="og:title" content="Anvitha Reddy — AI Engineer">
+  <meta property="og:description" content="I build AI that survives production. RAG pipelines, Text-to-SQL &amp; LLM orchestration at AMD.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://anvithareddy12.github.io/Anvithareddy.github.io/">
+  <meta property="og:image" content="https://anvithareddy12.github.io/Anvithareddy.github.io/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Anvitha Reddy — AI Engineer">
+  <meta name="twitter:description" content="I build AI that survives production. RAG pipelines, Text-to-SQL &amp; LLM orchestration at AMD.">
+  <meta name="twitter:image" content="https://anvithareddy12.github.io/Anvithareddy.github.io/og-image.png">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
@@ -45,8 +56,30 @@
   <div class="nav-actions">
     <button class="btn-ai" id="nav-ai-btn">Ask my AI ✦</button>
     <a href="#contact" class="btn-talk">Let's Talk</a>
+    <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
+
+<!-- MOBILE NAV -->
+<div id="mobile-nav" class="mobile-nav" role="dialog" aria-modal="true" aria-label="Navigation">
+  <button class="mobile-nav-close" id="mobile-nav-close" aria-label="Close navigation">✕</button>
+  <div class="mobile-nav-links">
+    <a href="#about">About</a>
+    <a href="#experience">Experience</a>
+    <a href="#projects">Projects</a>
+    <a href="#skills">Skills</a>
+    <a href="#education">Education</a>
+    <a href="#resume">Resume</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div class="mobile-nav-footer">
+    <button class="btn-ai" id="mobile-ai-btn">Ask my AI ✦</button>
+    <a href="#contact" class="btn-talk mobile-talk">Let's Talk</a>
+  </div>
+</div>
+<div id="mobile-nav-overlay" class="mobile-nav-overlay" aria-hidden="true"></div>
 
 <!-- HERO -->
 <section class="hero" id="home">
@@ -123,7 +156,7 @@
     <div class="c-cell"><div><span class="c-num" data-target="50" data-suffix="+">0</span></div><div class="c-lbl">Languages Supported</div></div>
     <div class="c-cell"><div><span class="c-num" data-target="95" data-suffix="%+">0</span></div><div class="c-lbl">ASL Accuracy</div></div>
     <div class="c-cell"><div><span class="c-num" data-target="300" data-suffix="%">0</span></div><div class="c-lbl">Engagement Increase</div></div>
-    <div class="c-cell"><div><span class="c-num" data-target="1000" data-suffix="+">0</span></div><div class="c-lbl">ASL Gestures</div></div>
+    <div class="c-cell"><div><span class="c-num" data-target="70" data-suffix="%+">0</span></div><div class="c-lbl">Test Coverage</div></div>
   </div>
 </section>
 
@@ -173,7 +206,7 @@
 <!-- PROJECTS — NO rv class on cards -->
 <section class="sec" id="projects">
   <div class="sec-label">Projects</div>
-  <h2 class="sec-title rv">Things I've shipped</h2>
+  <h2 class="sec-title rv">Built for production</h2>
   <p class="sec-sub rv">Production deployments, not demo notebooks.</p>
   <div class="proj-grid">
     <div class="proj-card">
@@ -325,6 +358,13 @@
       <div class="edu-deg">B.Tech — Computer Science (Data Science)</div>
       <div class="edu-school">Christ University, Bengaluru, KA</div>
       <div class="edu-date">Aug 2021 – April 2025 &nbsp;·&nbsp; GPA 3.5/4.0</div>
+      <div class="edu-skills">
+        <span class="stag">Machine Learning</span>
+        <span class="stag">Deep Learning</span>
+        <span class="stag">NLP</span>
+        <span class="stag">Database Systems</span>
+        <span class="stag">Data Structures</span>
+      </div>
     </div>
     <div class="edu-card">
       <div class="edu-icon">📚</div>
@@ -353,6 +393,9 @@
 <footer>
   <p>Built with Three.js, GSAP &amp; obsessive attention to latency &nbsp;·&nbsp; <span>Anvitha Reddy</span> © 2026</p>
 </footer>
+
+<!-- SCROLL TO TOP -->
+<button id="scroll-top" class="scroll-top" aria-label="Back to top">↑</button>
 
 <!-- CHAT WIDGET — bottom right -->
 <div id="chat-widget">

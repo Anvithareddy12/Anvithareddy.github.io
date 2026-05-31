@@ -2,6 +2,7 @@
 function initSphere() {
   var canvas = document.getElementById('sphere-canvas');
   if (!canvas || typeof THREE === 'undefined') return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   var W = canvas.clientWidth  || 500;
   var H = canvas.clientHeight || 500;
@@ -15,7 +16,7 @@ function initSphere() {
   camera.position.z = 3.2;
 
   // ── Particle cloud (Fibonacci sphere distribution) ──────────────
-  var N   = 1800;
+  var N   = window.innerWidth < 768 ? 700 : 1800;
   var geo = new THREE.BufferGeometry();
   var pos = new Float32Array(N * 3);
   var col = new Float32Array(N * 3);
@@ -70,6 +71,15 @@ function initSphere() {
   });
 
   // ── Resize ──────────────────────────────────────────────────────
+  // ── Touch tracking
+  canvas.addEventListener('touchmove', function (e) {
+    if (e.touches.length) {
+      targetX = (e.touches[0].clientX / window.innerWidth  - 0.5) * 1.2;
+      targetY = (e.touches[0].clientY / window.innerHeight - 0.5) * 1.2;
+    }
+  }, { passive: true });
+  canvas.addEventListener('touchend', function () { targetX = 0; targetY = 0; });
+
   window.addEventListener('resize', function() {
     var w = canvas.clientWidth;
     var h = canvas.clientHeight;
@@ -80,8 +90,9 @@ function initSphere() {
 
   // ── Render loop ─────────────────────────────────────────────────
   var t = 0;
+  var animReqId = null;
   function animate() {
-    requestAnimationFrame(animate);
+    animReqId = requestAnimationFrame(animate);
     t += 0.005;
     pts.rotation.y += (targetX * 0.06 - pts.rotation.y) * 0.04;
     pts.rotation.x += (-targetY * 0.06 - pts.rotation.x) * 0.04;
@@ -92,5 +103,13 @@ function initSphere() {
     octMesh.rotation.x =  t * 0.19;
     renderer.render(scene, camera);
   }
-  animate();
+  animReqId = requestAnimationFrame(animate);
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+      if (animReqId) { cancelAnimationFrame(animReqId); animReqId = null; }
+    } else {
+      if (!animReqId) animReqId = requestAnimationFrame(animate);
+    }
+  });
 }

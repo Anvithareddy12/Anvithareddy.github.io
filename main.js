@@ -55,10 +55,60 @@
   if (aiBtn) aiBtn.addEventListener('click', function () { openChat(); });
 }());
 
+// ── MOBILE NAV ───────────────────────────────────────────────────────────────
+(function () {
+  var hamburger = document.getElementById('nav-hamburger');
+  var mobileNav = document.getElementById('mobile-nav');
+  var overlay   = document.getElementById('mobile-nav-overlay');
+  var closeBtn  = document.getElementById('mobile-nav-close');
+
+  function openMobileNav() {
+    if (!mobileNav) return;
+    mobileNav.classList.add('open');
+    if (overlay) overlay.classList.add('open');
+    if (hamburger) { hamburger.classList.add('open'); hamburger.setAttribute('aria-expanded', 'true'); }
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMobileNav() {
+    if (!mobileNav) return;
+    mobileNav.classList.remove('open');
+    if (overlay) overlay.classList.remove('open');
+    if (hamburger) { hamburger.classList.remove('open'); hamburger.setAttribute('aria-expanded', 'false'); }
+    document.body.style.overflow = '';
+  }
+
+  if (hamburger) hamburger.addEventListener('click', function () {
+    mobileNav && mobileNav.classList.contains('open') ? closeMobileNav() : openMobileNav();
+  });
+  if (closeBtn) closeBtn.addEventListener('click', closeMobileNav);
+  if (overlay)  overlay.addEventListener('click',   closeMobileNav);
+  if (mobileNav) mobileNav.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', closeMobileNav);
+  });
+  var mobileAiBtn = document.getElementById('mobile-ai-btn');
+  if (mobileAiBtn) mobileAiBtn.addEventListener('click', function () {
+    closeMobileNav();
+    if (typeof openChat === 'function') openChat();
+  });
+}());
+
+// ── SCROLL TO TOP ─────────────────────────────────────────────────────────────
+(function () {
+  var btn = document.getElementById('scroll-top');
+  if (!btn) return;
+  window.addEventListener('scroll', function () {
+    btn.classList.toggle('vis', window.scrollY > 500);
+  }, { passive: true });
+  btn.addEventListener('click', function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}());
+
 // ── NEURAL NETWORK CANVAS BACKGROUND ─────────────────────────────────────────
 function initNeuralNetwork() {
   var canvas = document.getElementById('net-canvas');
   if (!canvas) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var ctx = canvas.getContext('2d');
 
   function resize() {
@@ -69,7 +119,7 @@ function initNeuralNetwork() {
   window.addEventListener('resize', resize);
 
   // Create nodes
-  var TOTAL = 90;
+  var TOTAL = window.innerWidth < 768 ? 45 : 90;
   var nodes = [];
   for (var i = 0; i < TOTAL; i++) {
     nodes.push({
@@ -86,6 +136,7 @@ function initNeuralNetwork() {
   var COLORS = ['rgba(0,212,255,', 'rgba(124,92,252,', 'rgba(54,245,192,'];
 
   function draw() {
+    if (document.hidden) { requestAnimationFrame(draw); return; }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Connections
@@ -198,10 +249,14 @@ function initCounters() {
 // Exp/proj cards also have NO .rv class — GSAP handles them exclusively.
 function initGSAP() {
   if (typeof gsap === 'undefined') return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('.rv').forEach(function (el) { el.classList.add('vis'); });
+    return;
+  }
   if (typeof ScrollTrigger !== 'undefined') gsap.registerPlugin(ScrollTrigger);
 
   // Hero entrance
-  var tl = gsap.timeline({ delay: 1.3 });
+  var tl = gsap.timeline({ delay: 0.2 });
   tl.from('#h-badge',  { opacity: 0, y: 16, duration: 0.4, ease: 'power2.out' })
     .from('#h-label',  { opacity: 0, y: 18, duration: 0.45, ease: 'power2.out' }, '-=0.2')
     .from('#h-title',  { opacity: 0, y: 26, duration: 0.55, ease: 'power2.out' }, '-=0.25')
